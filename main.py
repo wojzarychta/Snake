@@ -13,9 +13,6 @@ class Board:
         self.height = height
         pygame.display.update()
 
-    def draw(self):
-        self.display.fill((0, 0, 0))
-
     def __del__(self):
         pygame.quit()
 
@@ -32,6 +29,10 @@ class Apple:
         pygame.draw.circle(board.display, self.RED, (self.x, self.y), Board.spacing//2)
 
     def locate(self):
+        """
+        locates new apple randomly on the board
+        :return: none
+        """
         self.x = random.randrange(Board.spacing//2, board.width - Board.spacing//2, Board.spacing)
         self.y = random.randrange(Board.spacing // 2, board.height - Board.spacing // 2, Board.spacing)
 
@@ -45,16 +46,16 @@ class Snake:
     LIGHT_GREEN = (0x25, 0xe6, 0x31)
 
     def __init__(self):
-        self.snake = []
-        self.direction = self.RIGHT
+        self.snake = []  # list containing tuples with coordinates of snake's body parts
+        self.direction = self.RIGHT  # direction of snake's movement
         x = board.width//(2*Board.spacing)*Board.spacing + Board.spacing//2
         y = board.height // (2 * Board.spacing) * Board.spacing + Board.spacing // 2
-        self.snake.append((x, y))
+        self.snake.append((x, y))  # snake's head
 
     def check_collision(self, head: tuple[int, int]):
-        if head[0] < 0 or head[0] > board.width or head[1] < 0 or head[1] > board.height:
+        if head[0] < 0 or head[0] > board.width or head[1] < 0 or head[1] > board.height:  # check if head is beyond map
             return True
-        for i in self.snake:
+        for i in self.snake:  # check if head collides with any of snake's body parts
             if i[0] == head[0] and i[1] == head[1]:
                 return True
         return False
@@ -64,6 +65,7 @@ class Snake:
         return head[0] == apple.x and head[1] == apple.y
 
     def move(self, apple):
+        # move snake's head and store it in 'head'
         if self.direction == self.UP:
             head = (self.snake[0][0], self.snake[0][1] - Board.spacing)
         elif self.direction == self.DOWN:
@@ -73,21 +75,21 @@ class Snake:
         else:
             head = (self.snake[0][0] - Board.spacing, self.snake[0][1])
 
-        if self.check_collision(head):
+        if self.check_collision(head):  # game over
             return False
 
         if self.check_apple(head, apple):
-            self.extend(head)
-            apple.locate()
+            self.extend(head)  # extend snake by one
+            apple.locate()  # generate new apple
         else:
-            self.shift(head)
+            self.shift(head)  # move whole snake
         return True
 
     def extend(self, head: tuple[int, int]):
         self.snake.insert(0, head)
 
     def shift(self, head: tuple[int, int]):
-        # (i)th element of snake will change position to position of (i-1)th element
+        # (i)th element of snake will change position to position of (i+1)th element
         for i in range(1, len(self.snake)):
             self.snake[-i] = self.snake[-i - 1]
         self.snake[0] = head
@@ -130,8 +132,8 @@ def game_loop():
             return
         else:
             board.display.fill(black)
-            apple.draw()
             snake.draw()
+            apple.draw()
         pygame.display.update()
         timer.tick(timer_interval)
 
@@ -161,4 +163,3 @@ if __name__ == '__main__':
     while True:
         game_loop()
         play_again_loop()
-
